@@ -1,0 +1,94 @@
+#include <iostream>     
+#include <sstream>     
+#include <fstream>    
+using namespace std;
+
+int ** Create_matrix(int stroki,int stolbi){
+    
+    int **mat = new int *[stroki];
+    
+    for (int i = 0; i<stroki; i++) {
+        mat[i] = new int [stolbi];
+    }
+    
+    return mat;
+}
+
+void Show_matrix(int **mat,int stroki,int stolbi){
+    
+    for (int i = 0; i<stroki; i++) {
+        for (int j = 0; j<stolbi; j++) {
+            cout<<mat[i][j]<<" ";
+        }
+        cout<<'\n';
+    }
+}
+
+int ** Mult_matrix(int **mat1,int **mat2,int stroki1,int stolbi1,int stolbi2){
+   int **mat=Create_matrix(stroki1, stolbi2);
+    for (int i = 0; i<stroki1; i++) {
+        for (int j = 0; j<stolbi2; j++) {
+            mat[i][j] = 0;
+            for (int h = 0; h<stolbi1; h++) {
+                mat[i][j] += mat1[i][h]*mat2[h][j];
+            }
+        }
+    }
+    return mat;
+}
+
+bool Zapolnenie_mat(ifstream &file,int stroki,int stolbi,int **&mat){                                                                                                                                  матрицу*/
+    for (int i = 0 ; i<stroki; i++) {              
+        string stroka;                           
+        getline(file, stroka);                 
+        istringstream str (stroka);               
+        for (int j = 0; j<stolbi; j++) {
+            if (!(str>>mat[i][j])) {               
+                return  false;
+            }
+        }
+    }
+    return true;
+}
+bool Get_Size_Mat (int &stroki,int &stolbi,ifstream &file){        
+    string size_mat;   
+    char razdel=',';      
+    getline(file,size_mat);
+    istringstream str(size_mat);
+    if (str>>stroki && str>>razdel && str>>stolbi) { 
+        return true;
+    }
+    return false;
+}
+
+void Save_Result (int stroki1 ,int stolbi2 , int **mat3){       
+    ofstream file3("Result.txt");                                
+    file3<<stroki1<<","<<stolbi2<<endl;                            
+    for (int i = 0; i<stroki1; i++) {
+        for (int j = 0; j<stolbi2; j++) {                          
+            file3<<mat3[i][j]<<" ";
+        }
+        file3<<'\n';
+    }
+}
+int main() {
+    int stroki1 = 0,stolbi1 = 0,stroki2 = 0,stolbi2 = 0;
+    int **mat1,**mat2;
+    ifstream file1("A.txt");
+    ifstream file2("B.txt");
+    
+    if(Get_Size_Mat(stroki1,stolbi1,file1) && Get_Size_Mat(stroki2,stolbi2,file2)){
+     mat1 = Create_matrix(stroki1, stolbi1);
+     mat2 = Create_matrix(stroki2, stolbi2);
+    if (Zapolnenie_mat(file1, stroki1, stolbi1, mat1) && Zapolnenie_mat(file2, stroki2, stolbi2, mat2) && (stolbi1==stroki2)) {
+        Show_matrix(mat1, stroki1, stolbi1);
+        cout<<"*\n";;
+        Show_matrix(mat2, stroki2, stolbi2);
+        cout<<"\n";
+        Show_matrix(Mult_matrix(mat1, mat2, stroki1, stolbi1, stolbi2), stroki1, stolbi2 );
+        cout<<"\n";
+        Save_Result(stroki1, stolbi2, Mult_matrix(mat1, mat2, stroki1, stolbi1, stolbi2));
+       }
+    }
+    return 0;
+}
